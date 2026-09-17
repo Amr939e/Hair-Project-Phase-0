@@ -79,7 +79,7 @@ class Frenet:
 
         return self.T_sol, self.N_sol, self.B_sol
 
-    def compute_position(self,s_span,n, parting_line = False):
+    def compute_position(self,s_span,n):
         if self.T_sol is None:
             self.Frenet_solve(s_span,n)
 
@@ -93,41 +93,21 @@ class Frenet:
         constant = 0.3 * np.exp( -0.6*(p[0][1]+p[0][2])/2 )
         c_pareto = (p[0][0] * (np.min(curtors[:,0])) ** p[0][0]) / (curtors[:, 0] ** (p[0][0] + 1))
         weights = 2e-3*self.num_points*c_pareto / c_pareto.sum(axis=0)
-
-        N,h, scale= 1000, 0.1, 10/(10*n)
-
-        if parting_line is True:
-            for i in range(1,N+1):
-                h1 = 1 / N * h
-                T1 = self.T_sol[:, i - 1,:] + h1 * (1 - (i - 1) / N) *scale* direc_vecs
-                T2 = self.T_sol[:,i,:] + h1 * (1 - i / N) * scale*direc_vecs
-                T_avg = (T1 + T2) / 2
-                self.r_sol[:, i,:] = self.r_sol[:, i - 1,:] + T_avg * ds
-
-            for i in range(N+1,10*n):
-                T_avg = (self.T_sol[:, i - 2, :] + 4 * self.T_sol[:, i -1, :] + self.T_sol[:, i, :]) / 6 
-                self.r_sol[:, i, :] = self.r_sol[:, i - 2, :] + T_avg * 2 * ds
-
-                z = self.R_disk**2 - self.r_sol[:,i,0]**2 - self.r_sol[:,i,1]**2
-                mask = z>0
-                sub = constant*(abs(self.R_disk -self.r_sol[:, i, 2])).sum(axis=0) / self.num_points
-                self.r_sol[:,i,2][mask] -= weights[mask]*(self.r_sol[:,i,2][mask] - np.sqrt(z[mask]))
-                self.r_sol[:, i, 2][~mask] -= weights[~mask] *sub
-
-        else:
-            T_avg = (self.T_sol[:, 0, :] + self.T_sol[:, 1, :]) / 2
-            self.r_sol[:, 1, :] = self.r_sol[:, 0, :] + T_avg * ds
-
-            for i in range(2,10*n):
-                T_avg = (self.T_sol[:, i - 2,:] + 4 * self.T_sol[:, i - 1,:] + self.T_sol[:, i,:]) / 6       
-                self.r_sol[:, i,:] = self.r_sol[:, i - 2,:] + T_avg * 2 * ds
-
-                z = self.R_disk ** 2 - self.r_sol[:, i, 0] ** 2 - self.r_sol[:, i, 1] ** 2
-                mask = z > 0
-                sub = constant * (abs(self.R_disk - self.r_sol[:, i, 2])).sum(axis=0) / self.num_points
-                self.r_sol[:, i, 2][mask] -= weights[mask] * (self.r_sol[:, i, 2][mask] - np.sqrt(z[mask]))
-                self.r_sol[:, i, 2][~mask] -= weights[~mask] * sub
-
+        N = 200
+        
+        for i in range(1,N+1):
+            T_avg = (self.T_sol[:, i-1, :] + self.T_sol[:, i, :]) / 2
+            self.r_sol[:, i,:] = self.r_sol[:, i - 1,:] + T_avg * ds
+            
+        for i in range(N+1,10*n):
+            T_avg = (self.T_sol[:, i - 2, :] + 4 * self.T_sol[:, i -1, :] + self.T_sol[:, i, :]) / 6 
+            self.r_sol[:, i, :] = self.r_sol[:, i - 2, :] + T_avg * 2 * ds
+    
+            z = self.R_disk**2 - self.r_sol[:,i,0]**2 - self.r_sol[:,i,1]**2
+            mask = z>0
+            sub = constant*(abs(self.R_disk -self.r_sol[:, i, 2])).sum(axis=0) / self.num_points
+            self.r_sol[:,i,2][mask] -= weights[mask]*(self.r_sol[:,i,2][mask] - np.sqrt(z[mask]))
+            self.r_sol[:, i, 2][~mask] -= weights[~mask] *sub
 
         vec_interp = np.vectorize(self.interp_func, signature='(m,3),(t),(n)->(n,3)')
         self.r_sol = vec_interp(self.r_sol, s_eval, self.intervals)
