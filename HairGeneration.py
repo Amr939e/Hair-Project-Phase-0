@@ -326,7 +326,6 @@ class HairGen:
                         points_array)
         curve.all_points_with_vars = points_array, curtors, bases, direc_vecs
         curve.R_disk = self.R_disk
-        curve.r_points = self.num_points
         curve.num_points = self.num_points
         curve.y0 = bases.reshape(-1, 9).flatten()
         curve.param_matrix = self.param_matrix
