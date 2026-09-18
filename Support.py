@@ -23,16 +23,6 @@ class Distributions:
         mean = stats.pareto.mean(self.param, scale = lower)
         return x, mean
 
-    def inv_normal(self, sigma):
-        lower, upper = self.interval[0], self.interval[1]
-        F_lower = stats.norm.cdf(lower, self.param, scale=sigma)
-        F_upper = stats.norm.cdf(upper, self.param, scale=sigma)
-
-        u = np.random.random(self.num)
-        u1 = F_lower + u * (F_upper - F_lower)
-        x = stats.norm.ppf(u1, self.param, scale=sigma)
-        return x
-
 class T:
     def rotation_tang_naxis(self, theta, vecs):
         e1, e2, e3 = vecs[:,0], vecs[:,1], vecs[:,2]
