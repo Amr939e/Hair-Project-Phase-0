@@ -256,7 +256,7 @@ class HairGen:
         curtors = np.concatenate([curtor, weighted_curtor], axis =0)
         bases = np.concatenate([utv, oav], axis=0)
         direc_vecs = np.concatenate([direction_vecs, other_vecs], axis=0)
-        self.t.checkpoint("Completed full other hair distribution")
+
         return points_array, curtors, bases, direc_vecs
 #########################CURVATURE DISTRIBUTION PLOT#############################################################
     def practice_curvtor_plot(self):
@@ -355,7 +355,7 @@ class HairGen:
         self.t.checkpoint("Everything done")
         plt.show()
       
-#EXAMPLE PLOTS
+#EXAMPLE PLOT
 # P1 = HairGen(100,1500,1000, 1/5,300, [[0,0,1], [50,0,0], np.pi])
 # P1.plot_hair_strands([[1.2, 0.29,0.36], [1.4, 0.2, 0.28]],'hair_11','skin_19', parting_line=True)
 #P1.practice_curvtor_plot()
