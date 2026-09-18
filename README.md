@@ -2,7 +2,9 @@
 
 A purely geometric hair model constructed using Python, that is conscious of a substantial range of human hair curvature, 
 utilizing differential geometry, probability theory and linear algebra to generate a large variety of hair types
-on a hemispherical plot. 
+on a hemispherical plot. Input curvature and torsion values in the interval [0,1] into the plot_hair_strands function,
+and choose haircolour and skincolour from the SkinHairMaps. The values should be realistic, without giant gaps between
+the intervals, otherwise the model will become less accurate, particularly as you approach higher torsion values. 
 
 **Author:** Amare McDonald  
 **Year:** 2026  
