@@ -202,7 +202,9 @@ class HairGen:
 
         else:
             direction_vecs = np.tile([0,0,0],(self.num_guide_hairs,1))
-            theta_2A = np.random.uniform(-2*np.pi,2*np.pi, self.num_guide_hairs)
+            circ_vecs = guide_array - np.tile([0,0,self.R_disk], [self.num_guide_hairs,1])
+            b_2 = np.sum(circ_vecs * guide_tan_uvecs[:, 1], axis=1)
+            b_3 = np.sum(circ_vecs * guide_tan_uvecs[:, 2], axis=1)
             utv = self.T.rotation_tang_naxis(theta_2A, guide_tan_uvecs)
 
         self.guide_and_vars = guide_array, curtor,utv, theta_2A, direction_vecs
