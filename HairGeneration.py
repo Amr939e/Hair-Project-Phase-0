@@ -130,7 +130,7 @@ class HairGen:
         return weighted_curtor, basis_vectors
 ############## MAIN GENERATION ####################################################################################
 
-    def assign_strand_vars(self,parting_line = False):
+    def assign_strand_vars(self):
         self.num_guide_hairs = int(self.num_points * self.guide_factor)
         if self.guides_used > self.num_guide_hairs:
             raise ValueError(f' number of guides used must be less than or equal to {self.num_guide_hairs} given a guide factor of {self.guide_factor}')
@@ -188,71 +188,54 @@ class HairGen:
         #DIRECTION SETUP
         guide_tan_uvecs = self.T.tangent_plane_arrays(guide_hairs, self.R_disk)
         guide_array = np.array(guide_hairs)
+        direction_vecs, norms, parting_points = self.parting_func(guide_array)
 
-        if parting_line is True:
-            direction_vecs, norms, parting_points = self.parting_func(guide_array)
+        b_2 = np.sum(direction_vecs*guide_tan_uvecs[:,1], axis =1)
+        b_3 = np.sum(direction_vecs * guide_tan_uvecs[:, 2], axis=1)
+        theta_1A = np.atan2(-b_2,b_3)
 
-            b_2 = np.sum(direction_vecs*guide_tan_uvecs[:,1], axis =1)
-            b_3 = np.sum(direction_vecs * guide_tan_uvecs[:, 2], axis=1)
-            theta_1A = np.atan2(-b_2,b_3)
-
-            theta_2A = self.Dance_func([50, 0, np.pi / 2, 1], 10, guide_array[:,0])
-            r_angle = theta_1A + theta_2A
-            utv = self.T.rotation_tang_naxis(r_angle, guide_tan_uvecs)
-
-        else:
-            direction_vecs = np.tile([0,0,0],(self.num_guide_hairs,1))
-            circ_vecs = guide_array - np.tile([0,0,self.R_disk], [self.num_guide_hairs,1])
-            b_2 = np.sum(circ_vecs * guide_tan_uvecs[:, 1], axis=1)
-            b_3 = np.sum(circ_vecs * guide_tan_uvecs[:, 2], axis=1)
-            utv = self.T.rotation_tang_naxis(theta_2A, guide_tan_uvecs)
+        theta_2A = self.Dance_func([50, 0, np.pi / 2, 1], 10, guide_array[:,0])
+        r_angle = theta_1A + theta_2A
+        utv = self.T.rotation_tang_naxis(r_angle, guide_tan_uvecs)
 
         self.guide_and_vars = guide_array, curtor,utv, theta_2A, direction_vecs
       
         #GUIDE HAIR PROPAGATION, PARETO WEIGHTS
         other_tan_uvecs = self.T.tangent_plane_arrays(other_hairs, self.R_disk)
         other_array = np.array(other_hairs)
-        other_vecs = np.tile([0,0,0], (n2,1))
+        
+        weighted_curtor = []
+        oav = []
+        other_vecs, norms, other_ppoints = self.parting_func(other_array)
 
-        if parting_line is True:
-            weighted_curtor = []
-            oav = []
-            other_vecs, norms, other_ppoints = self.parting_func(other_array)
+        condition1 = other_vecs[:, 1] < 0
+        condition2 = direction_vecs[:, 1] < 0
+        indices = [[np.where(condition1)[0], np.where(condition2)[0]],
+                   [np.where(~condition1)[0], np.where(~condition2)[0]]]
 
-            condition1 = other_vecs[:, 1] < 0
-            condition2 = direction_vecs[:, 1] < 0
-            indices = [[np.where(condition1)[0], np.where(condition2)[0]],
-                       [np.where(~condition1)[0], np.where(~condition2)[0]]]
+        c_2 = np.sum(other_vecs * other_tan_uvecs[:, 1], axis=1)
+        c_3 = np.sum(other_vecs * other_tan_uvecs[:, 2], axis=1)
+        theta_1B = np.atan2(-c_2, c_3)
 
-            c_2 = np.sum(other_vecs * other_tan_uvecs[:, 1], axis=1)
-            c_3 = np.sum(other_vecs * other_tan_uvecs[:, 2], axis=1)
-            theta_1B = np.atan2(-c_2, c_3)
+        for side in indices: # always 2 sides
+            o_points = other_array[side[0]]
+            vecs = other_tan_uvecs[side[0]]
+            g_points = guide_array[side[1]]
+            theta = theta_1B[side[0]]
 
-            for side in indices: # always 2 sides
-                o_points = other_array[side[0]]
-                vecs = other_tan_uvecs[side[0]]
-                g_points = guide_array[side[1]]
-                theta = theta_1B[side[0]]
+            d = o_points[:, None, :] - g_points[None, :, :]
+            d_norms = np.linalg.norm(d, axis=2)
+            h_n = min(len(side[1]),int(np.floor(self.guides_used/2)))  
+            wv, bv = self.other_vars_func(d_norms, vecs,theta,h_n)
 
-                d = o_points[:, None, :] - g_points[None, :, :]
-                d_norms = np.linalg.norm(d, axis=2)
-                h_n = min(len(side[1]),int(np.floor(self.guides_used/2)))  
-                wv, bv = self.other_vars_func(d_norms, vecs,theta,h_n)
+            weighted_curtor.append(wv)
+            oav.append(bv)
+        weighted_curtor = np.concatenate(weighted_curtor)
+        oav = np.concatenate(oav)
+        other_array= np.concatenate([other_array[indices[0][0]],other_array[indices[1][0]]], axis =0)
+        other_vecs = np.concatenate([other_vecs[indices[0][0]], other_vecs[indices[1][0]]], axis =0)
 
-                weighted_curtor.append(wv)
-                oav.append(bv)
-            weighted_curtor = np.concatenate(weighted_curtor)
-            oav = np.concatenate(oav)
-            other_array= np.concatenate([other_array[indices[0][0]],other_array[indices[1][0]]], axis =0)
-            other_vecs = np.concatenate([other_vecs[indices[0][0]], other_vecs[indices[1][0]]], axis =0)
-
-            self.others_and_vars = other_array, weighted_curtor, oav, other_vecs
-        else:
-            theta = np.zeros(n2)
-            d_total = other_array[:, None, :] - guide_array[None, :, :]
-            d_norms_t = np.linalg.norm(d_total, axis=2)
-            weighted_curtor, oav= self.other_vars_func(d_norms_t, other_tan_uvecs, theta,self.guides_used)
-            self.others_and_vars = other_array, weighted_curtor, oav, other_vecs
+        self.others_and_vars = other_array, weighted_curtor, oav, other_vecs
 
         points_array = np.concatenate([guide_array, other_array], axis =0)
         curtors = np.concatenate([curtor, weighted_curtor], axis =0)
@@ -311,11 +294,7 @@ class HairGen:
         ax.set_box_aspect([1, 1, 0.5])
         ax.plot_surface(x, y, z, cmap=SkinHairmaps.SKIN_CMAPS[skincolour], alpha=0.8, zorder=1)
       
-        if parting_line is True:
-            points_array, curtors, bases, direc_vecs = self.assign_strand_vars(parting_line = True)
-        else:
-            points_array, curtors, bases, direc_vecs = self.assign_strand_vars()
-
+        points_array, curtors, bases, direc_vecs = self.assign_strand_vars()
         self.lengths,curtors[:,0], grad, grav = self.length_func(curtors[:,0], points_array[:,2])
       
         average_curv = (param_matrix[0][1]+param_matrix[0][2])/2
@@ -359,5 +338,5 @@ class HairGen:
       
 #EXAMPLE PLOT
 # P1 = HairGen(100,1500,1000, 1/5,300, [[0,0,1], [50,0,0], np.pi])
-# P1.plot_hair_strands([[1.2, 0.29,0.36], [1.4, 0.2, 0.28]],'hair_11','skin_19', parting_line=True)
+# P1.plot_hair_strands([[1.2, 0.29,0.36], [1.4, 0.2, 0.28]],'hair_11','skin_19')
 #P1.practice_curvtor_plot()
