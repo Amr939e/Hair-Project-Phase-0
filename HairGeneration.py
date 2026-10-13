@@ -160,7 +160,6 @@ class HairGen:
         mask = np.ones(Poisson.num_gen_hairs, dtype=bool)
         mask[guide_index] = False
         other_hairs = points_3d[mask]
-        n2 = self.num_points - self.num_guide_hairs
       
         # CURVATURE AND TORSION SETUP
         p = self.param_matrix
