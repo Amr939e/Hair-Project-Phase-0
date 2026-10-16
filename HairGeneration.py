@@ -169,15 +169,19 @@ class HairGen:
             raise ValueError(f' Curvature shape parameter must be in the interval [1,2]')
         elif p[1][0] < 1 or p[1][0] >2:
             raise ValueError(f' Torsion shape parameter must be in the interval [1,2]')
+        elif p[0][1] <0 or p[0][2] >1:
+            raise ValueError(f'Please ensure curvature interval is a subset of [0,1]')
+        elif p[1][1] <0 or p[1][2] >1:
+            raise ValueError(f'Please ensure torsion interval is a subset of [0,1]')
+        
         elif p[0][1] == p[0][2] or p[0][2] <= p[0][1]:
             raise ValueError(f' Please ensure curvature interval has size greater than 0, and that the upper bound is greater than the lower')
         elif p[1][1] == p[1][2] or p[1][2] <= p[1][1]:
             raise ValueError(f' Please ensure torsion interval has size greater than 0, and that the upper bound is greater than the lower')
-        elif p[1][0] <0 or p[1][1] >1:
-            raise ValueError(f'Please ensure torsion bounds are in the interval [0,1]')
-        elif p[1][1] > 0.7  and abs(p[0][1] - p[1][1]) >=0.3:
-            raise ValueError(f' Please ensure the gap between the lower bounds is less than 0.3 given the higher torsion (subject to change depending on k_p)')
-
+            
+        elif p[1][2] - p[0][2] >= 0.1:
+            raise ValueError(f' Please torsion upper bound does not exceed 0.1 above the curvature upper bound ')
+            
         curvature = Distributions(p[0][0], [p[0][1], p[0][2]], int(self.num_guide_hairs/2))
         curv, mean_curv = curvature.inv_Pareto()
         curv = np.tile( curv, 2) 
