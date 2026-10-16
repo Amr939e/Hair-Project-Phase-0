@@ -9,7 +9,8 @@ from  FrenetSolver import Frenet
 import SkinHairmaps
 
 class HairGen:
-    def __init__(self,diameter, num_points, plot_points, guide_factor, guides_used, parting_vars):
+    def __init__(self,diameter, num_points, plot_points, guide_factor, guides_used,
+                 param_matrix, parting_vars):
         self.diameter = diameter
         self.center = [self.diameter/2, self.diameter/2]
         self.R_disk = self.diameter/ 2
@@ -24,6 +25,7 @@ class HairGen:
         self.param_matrix = None
         self.num_guide_hairs = None
 
+        self.param_matrix = param_matrix
         self.T = T()
         self.parting_curve = lambda s: self.T.gc_comp_func(parting_vars, self.R_disk, s)
         self.Jacobian = lambda s: self.T.gc_comptan_func(parting_vars, self.R_disk, s)
@@ -278,8 +280,8 @@ class HairGen:
         ax.set_zlabel('Z')
         plt.show()
 ###############FINAL PLOT##############################################################################
-    def plot_hair_strands(self, param_matrix,haircolour, skincolour, parting_line = False ):
-        self.param_matrix = param_matrix
+    def plot_hair_strands(self,haircolour, skincolour):
+        p = self.param_matrix
         theta = np.linspace(0, 2 * np.pi, 100)
         phi = np.linspace(0, np.pi / 2, 100)
 
@@ -296,8 +298,8 @@ class HairGen:
         points_array, curtors, bases, direc_vecs = self.assign_strand_vars()
         self.lengths,curtors[:,0], grad, grav = self.length_func(curtors[:,0], points_array[:,2])
       
-        average_curv = (param_matrix[0][1]+param_matrix[0][2])/2
-        amp2 = (param_matrix[1][2] + param_matrix[1][1])/2 + average_curv/4
+        average_curv = (p[0][1]+p[0][2])/2
+        amp2 = (p[1][2] + p[1][1])/2 + average_curv/4
         tau_pert = lambda s:  amp2 * np.sin((average_curv*curtors[:,0]*s))
       
         curve = Frenet(lambda s: self.curvature_func(curtors[:,0], grad,grav, s),
@@ -327,7 +329,7 @@ class HairGen:
         ax.add_collection(hairs)
         ax.scatter(xc[:,0], yc[:,0], zc[:,0], color='g', s=5)
         ax.scatter(xc[:,-1], yc[:,-1], zc[:,-1], color='y', s=2)
-        ax.set_title(f'Hair Model: Curvature = {[ param_matrix[0][1], param_matrix[0][2]]}, Torsion ={[param_matrix[1][1], param_matrix[1][2]]}')
+        ax.set_title(f'Hair Model: Curvature = {[ p[0][1], p[0][2]]}, Torsion ={[p[1][1], p[1][2]]}')
         ax.set_aspect('equal')
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
@@ -336,6 +338,7 @@ class HairGen:
         plt.show()
       
 #EXAMPLE PLOT
-# P1 = HairGen(100,1500,1000, 1/5,300, [[0,0,1], [50,0,0], np.pi])
-# P1.plot_hair_strands([[1.2, 0.29,0.36], [1.4, 0.2, 0.28]],'hair_11','skin_19')
+# P1 = HairGen(100,1500,1000, 1/5,300,
+[[1.2, 0.29,0.36], [1.4, 0.2, 0.28]], [[0,0,1], [50,0,0], np.pi])
+# P1.plot_hair_strands('hair_11','skin_19')
 #P1.practice_curvtor_plot()
