@@ -260,6 +260,7 @@ class HairGen:
         ax.set_box_aspect([1, 1, 0.5])
         ax.plot_surface(x, y, z, color='cyan', alpha=0.3, zorder=1)
 
+        self.num_points = 2*self.num_points
         points_array, curtors, bases, direc_vecs = self.assign_strand_vars()
         n = 2 * self.num_guide_hairs
         lis = np.linspace(p[0][1], p[0][2], n)
