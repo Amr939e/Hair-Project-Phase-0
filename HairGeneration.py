@@ -338,7 +338,6 @@ class HairGen:
         plt.show()
       
 #EXAMPLE PLOT
-# P1 = HairGen(100,1500,1000, 1/5,300,
-[[1.2, 0.29,0.36], [1.4, 0.2, 0.28]], [[0,0,1], [50,0,0], np.pi])
+# P1 = HairGen(100,1500,1000, 1/5,300, [[1.2, 0.29,0.36], [1.4, 0.2, 0.28]], [[0,0,1], [50,0,0], np.pi])
 # P1.plot_hair_strands('hair_11','skin_19')
 #P1.practice_curvtor_plot()
