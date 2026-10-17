@@ -235,10 +235,12 @@ class HairGen:
 
             weighted_curtor.append(wv)
             oav.append(bv)
+            
         weighted_curtor = np.concatenate(weighted_curtor)
         oav = np.concatenate(oav)
-        other_array= np.concatenate([other_array[indices[0][0]],other_array[indices[1][0]]], axis =0)
-        other_vecs = np.concatenate([other_vecs[indices[0][0]], other_vecs[indices[1][0]]], axis =0)
+        other_index = np.concatenate((indices[0][0], indices[1][0]))
+        other_array= other_array[other_index]
+        other_vecs = other_vecs[other_index]
 
         self.others_and_vars = other_array, weighted_curtor, oav, other_vecs
 
