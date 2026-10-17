@@ -328,14 +328,15 @@ class HairGen:
 
         plott = np.random.choice(np.arange(2*self.num_points), size=self.plot_points, replace=False)
         curve.r_sol = curve.r_sol[plott]
+        hairs = Line3DCollection(curve.r_sol, colors=SkinHairmaps.HAIR[haircolour], linewidths=2)
+        ax.add_collection(hairs)
+
         xc = curve.r_sol[:, :,0]
         yc = curve.r_sol[:, :,1]
         zc = curve.r_sol[:, :,2]
-        hairs = Line3DCollection(curve.r_sol, colors=SkinHairmaps.HAIR[haircolour], linewidths=2)
-
-        ax.add_collection(hairs)
         ax.scatter(xc[:,0], yc[:,0], zc[:,0], color='g', s=5)
         ax.scatter(xc[:,-1], yc[:,-1], zc[:,-1], color='y', s=2)
+        
         ax.set_title(f'Hair Model: Curvature = {[ p[0][1], p[0][2]]}, Torsion ={[p[1][1], p[1][2]]}')
         ax.set_aspect('equal')
         ax.set_xlabel('X')
