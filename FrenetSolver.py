@@ -35,6 +35,7 @@ class Frenet:
         T = y[np.where(T_mask)[0].reshape(self.num_points,3)]
         N = y[np.where(N_mask)[0].reshape(self.num_points,3)]
         B = y[np.where(B_mask)[0].reshape(self.num_points,3)]
+        
         T_ = k[:,None] * N
         N_ = -k[:,None] * T + tau[:,None] * B
         B_ = -tau[:,None] * N
