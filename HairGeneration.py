@@ -342,7 +342,6 @@ class HairGen:
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
-        self.t.checkpoint("Everything done")
         plt.show()
       
 #EXAMPLE PLOT
