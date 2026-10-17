@@ -276,7 +276,7 @@ class HairGen:
             sel = points_array[mask]
             if sel.shape[0] == 0:
                 continue
-            colours = np.linspace(c0, c1, sel.shape[0])
+            colours = curtors[mask,0]
             ax.scatter(sel[:, 0], sel[:, 1], sel[:, 2], c=colours, cmap='plasma', s=20)
 
         ax.set_title(f'Colour map according to curvature')
