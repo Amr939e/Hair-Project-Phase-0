@@ -44,7 +44,7 @@ class Frenet:
         return t
 
     def interp_func(self, point_data, full_t, new_times):
-        f = interp1d(full_t, point_data, axis = 0, kind ='linear')
+        f = interp1d(full_t, point_data, axis = 0, kind ='cubic')
         return f(new_times)
 
     def Frenet_solve(self, s_span, n, orient = False):
