@@ -71,25 +71,29 @@ class T:
 
         return T_, N_, B_
 
-    def gc_comp_func(self,parting_vars,R,s):
-        n1 = np.cos(parting_vars[2]*s)
-        n2 = np.sin(parting_vars[2]*s)
+    def gc_comp_func(self,vars,R,s):
+         if vars[2] < np.pi/16:
+            vars[2] = np.pi/16
+        n1 = np.cos(vars[2]*s)
+        n2 = np.sin(vars[2]*s)
       
-        x = parting_vars[1][0]*n1+ parting_vars[0][0]*R*n2
-        y = parting_vars[1][1]*n1+ parting_vars[0][1]*R*n2
-        z = parting_vars[1][2]*n1+ parting_vars[0][2]*R*n2
+        x = vars[1][0]*n1+ vars[0][0]*R*n2
+        y = vars[1][1]*n1+ vars[0][1]*R*n2
+        z = vars[1][2]*n1+ vars[0][2]*R*n2
       
         return np.column_stack([x, y, z])
-                                                                              #parting_vars = initial direction, initial point, frequency
-    def gc_comptan_func(self, parting_vars,R, s):
+                                                                              #vars = initial direction, initial point, frequency
+    def gc_comptan_func(self, vars,R, s):
+         if vars[2] < np.pi/16:
+            vars[2] = np.pi/16
         n1 = np.cos(parting_vars[2] * s)
         n2 = np.sin(parting_vars[2] * s)
       
-        x = parting_vars[0][0]*R*parting_vars[2]*n1 - parting_vars[2]*parting_vars[1][0] * n2
-        y = parting_vars[0][1]*R*parting_vars[2]*n1 - parting_vars[2]*parting_vars[1][1] * n2
-        z = parting_vars[0][2]*R*parting_vars[2]*n1 - parting_vars[2]*parting_vars[1][2] * n2
+        x = vars[0][0]*R*vars[2]*n1 - vars[2]*vars[1][0] * n2
+        y = vars[0][1]*R*vars[2]*n1 - vars[2]*vars[1][1] * n2
+        z = vars[0][2]*R*vars[2]*n1 - vars[2]*vars[1][2] * n2
       
-        return np.column_stack([x/parting_vars[2], y/parting_vars[2], z/parting_vars[2]])
+        return np.column_stack([x/vars[2], y/vars[2], z/vars[2]])
 
 
 class PoissonDisk:
