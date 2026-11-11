@@ -64,21 +64,9 @@ class HairGen:
     def parting_func(self, P):
         v = np.linspace(0.01,1,400)
         curve_points = self.parting_curve(v)
-        deriv_curve_points = self.Jacobian(v)
-
-        check = np.sum(deriv_curve_points[None,:,:]*P[:,None,:], axis =2)
-
-        t = [ np.where( arr[:-1]*arr[1:] < 0)[0] for arr in check]
-        arr = np.array(t, dtype=object)
-        size = np.array([len(a) for a in arr])
-        indices = np.where(size != 1)[0]
-      
-        if len(indices) >0:
-            Test = np.linalg.norm(P[indices][:,None,:] - curve_points[None,:,:], axis =2)[:,0:396]
-            index = np.argmin(Test, axis =1)
-            arr[indices] = [ np.atleast_1d(x) for x in index]
-        arr = arr.flatten()
-        S = np.array([(v[arr[i]] + v[arr[i]+1]) / 2  for i in range(len(P))])
+        norms = np.linalg.norm(P[:, None, :] - curve_points[None, :, :], axis=2)
+        indexes = np.argmin(norms, axis =1)
+        S = v[indexes]
       
         parting_points = self.parting_curve(S)
         differences = P - parting_points
