@@ -156,8 +156,11 @@ class HairGen:
 
         #GUIDE HAIRS SETUP
         split_mask = np.where(points_3d[:, 1] < 0)[0]
-        guide = np.random.choice(np.arange(len(split_mask)), size=int(self.num_guide_hairs/2), replace=False)
-        guide_index = split_mask[guide]
+        if len(split_mask) > 1:
+            guide = np.random.choice(np.arange(len(split_mask)), size=self.num_guide_hairs, replace=False)
+            guide_index = split_mask[guide]
+        else:
+            guide_index = np.arange(len(points_3d))
 
         g_side1 = points_3d[guide_index]
         g_side2 = g_side1.copy()
