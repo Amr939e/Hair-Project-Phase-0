@@ -133,6 +133,11 @@ class HairGen:
 ############## MAIN GENERATION ####################################################################################
 
     def assign_strand_vars(self):
+        if self.guide_factor >1:
+            raise ValueError(f' Please ensure guide factor is less than or equal to 1')
+        if self.num_points <= 1 or not isinstance(self.num_points,int):
+            raise ValueError(f' Please ensure number of points is an integer greater than 1')
+        
         self.num_guide_hairs = int(self.num_points * self.guide_factor)
         if self.guides_used > self.num_guide_hairs:
             raise ValueError(f' number of guides used must be less than or equal to {self.num_guide_hairs} given a guide factor of {self.guide_factor}')
