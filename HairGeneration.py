@@ -145,7 +145,7 @@ class HairGen:
         #GUIDE HAIRS SETUP
         split_mask = np.where(points_3d[:, 1] < 0)[0]
         if len(split_mask) > 1:
-            guide = np.random.choice(np.arange(len(split_mask)), size=self.num_guide_hairs, replace=False)
+            guide = np.random.choice(np.arange(len(split_mask)), size=int(self.num_guide_hairs/2), replace=False)
             guide_index = split_mask[guide]
         else:
             guide_index = np.arange(len(points_3d))
@@ -178,9 +178,9 @@ class HairGen:
         elif p[1][2] - p[0][2] >= 0.1:
             raise ValueError(f' Please torsion upper bound does not exceed 0.1 above the curvature upper bound ')
             
-        curvature = Distributions(p[0][0], [p[0][1], p[0][2]], int(self.num_guide_hairs/2))
+        curvature = Distributions(p[0][0], [p[0][1], p[0][2]], self.num_guide_hairs)
         curv, mean_curv = curvature.inv_Pareto()
-        curv = np.tile( curv, 2) 
+        np.random.shuffle(curv)
 
         torsion = Distributions(p[1][0], [p[1][1], p[1][2]], self.num_guide_hairs)
         tau, mean_tau = torsion.inv_Pareto()
